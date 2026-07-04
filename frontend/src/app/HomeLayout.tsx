@@ -1,0 +1,22 @@
+import React, { ReactNode } from "react";
+import { SidebarProvider } from "../components/ui/sidebar";
+import SideBar from "../components/Sidebar";
+
+interface BlogsProps {
+  children: ReactNode;
+}
+
+const HomeLayout: React.FC<BlogsProps> = ({ children }) => {
+  return (
+    <div>
+      <SidebarProvider>
+        <SideBar />
+        <main className="w-full">
+          <div className="w-full min-h-[calc(100vh-45px)] px-4">{children}</div>
+        </main>
+      </SidebarProvider>
+    </div>
+  );
+};
+
+export default HomeLayout;
