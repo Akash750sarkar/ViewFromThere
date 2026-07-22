@@ -52,6 +52,15 @@ async function initDB() {
             create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );`;
 
+            await sql`CREATE TABLE IF NOT EXISTS blogreactions(
+            id SERIAL PRIMARY KEY,
+            userid VARCHAR(255) NOT NULL,
+            blogid VARCHAR(255) NOT NULL,
+            reaction VARCHAR(20) NOT NULL,
+            create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(userid, blogid)
+        );`;
+
     console.log("database initialized successfully");
   } catch (error) {
     console.log("Error initDB", error);

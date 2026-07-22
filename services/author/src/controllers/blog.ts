@@ -116,6 +116,33 @@ export const createBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
 //   });
 // });
 
+
+export const uploadBlogContentImage = TryCatch(
+  async (req: AuthenticatedRequest, res) => {
+    const file = req.file;
+
+    if (!file) {
+      res.status(400).json({ message: "No File to Upload" });
+      return;
+    }
+
+    const fileBuffer = getBuffer(file);
+
+    if (!fileBuffer || !fileBuffer.content) {
+      res.status(400).json({ message: "Failed to Generate Buffer" });
+      return;
+    }
+
+    const cloud = await cloudinary.v2.uploader.upload(fileBuffer.content, {
+      folder: "blogs/content",
+    });
+
+    res.json({
+      url: cloud.secure_url,
+    });
+  },
+);
+
 export const updateBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
   const { id } = req.params;
   const { title, description, blogcontent, category } = req.body;

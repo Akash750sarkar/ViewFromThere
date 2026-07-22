@@ -18,39 +18,49 @@ const Blogs = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className="container mx-auto px-4"> 
-          <section className="border-b py-10 md:py-14">
-            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-              Travel Journal
-            </p>
+        <div className="mx-auto w-[93%] max-w-[1500px]">
+          <section className="mt-8 grid items-center gap-16 rounded-[36px] border border-stone-200 bg-[#e6dece] px-12 py-12 lg:grid-cols-2">
+            <div>
+              <span className="inline-flex rounded-full bg-[#e6d0a8] px-4 py-2 text-sm font-medium text-[#355C6B]">
+                🌍 Real stories from real travellers
+              </span>
 
-            <div className="mt-3 max-w-4xl">
-              <h1 className="text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
-                Travel stories from people who were actually there.
-              </h1>
+              <div className="mt-3 max-w-4xl">
+                <h1 className="text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
+                  Travel <span className="text-[#355C6B]">stories </span>from
+                  people who were actually there.
+                </h1>
 
-              <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
-                ViewFromThere is a place for honest travel writing, lived
-                experiences, hidden routes, quiet journeys, and practical notes
-                from the road.
-              </p>
+                <p className="mt-5 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
+                  ViewFromThere is a place for honest travel writing, lived
+                  experiences, hidden routes, quiet journeys, and practical
+                  notes from the road.
+                </p>
+              </div>
+
+              <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+                <Button asChild className="bg-[#305867] px-8 py-6 text-base">
+                  <a href="#latest-stories">Start Reading</a>
+                </Button>
+
+                <Button asChild  className="bg-[#305867] px-8 py-6 text-base">
+                  <Link href="/blog/new" className="flex items-center gap-2">
+                    <PenLine size={17} />
+                    Write a Story
+                  </Link>
+                </Button>
+              </div>
             </div>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Button asChild>
-                <a href="#latest-stories">Start Reading</a>
-              </Button>
-
-              <Button variant="outline" asChild>
-                <Link href="/blog/new" className="flex items-center gap-2">
-                  <PenLine size={17} />
-                  Write a Story
-                </Link>
-              </Button>
+            <div className="hidden lg:flex justify-end">
+              <img
+                src="/hero.png"
+                alt="Travel Camera"
+                className="h-[560px] w-full max-w-[700px] rounded-[32px] object-cover object-[32%]"
+              />
             </div>
           </section>
 
-          <section id="latest-stories" className="py-8">
+          <section id="latest-stories" className="mt-8 py-10">
             <div className="mb-6 flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">

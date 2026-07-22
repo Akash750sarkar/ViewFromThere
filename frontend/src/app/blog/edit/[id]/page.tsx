@@ -40,6 +40,7 @@ const EditBlogPage = () => {
   const [content, setContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [existingImage, setExistingImage] = useState<string | null>(null);
 
@@ -195,6 +196,47 @@ const EditBlogPage = () => {
     () => ({
       readonly: false,
       placeholder: "Start typings...",
+      uploader: {
+        insertImageAsBase64URI: false,
+        url: `${author_service}/api/v1/blog/upload-image`,
+        filesVariableName: () => "file",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        format: "json",
+        beforeUpload: () => {
+          setImageUploading(true);
+          toast.loading("Image uploading...", { id: "blog-image-upload" });
+        },
+        isSuccess: () => true,
+        process: (resp: { url: string }) => {
+          setImageUploading(false);
+          toast.dismiss("blog-image-upload");
+
+          return {
+            files: [resp.url],
+            path: "",
+            baseurl: "",
+            error: 0,
+            msg: "",
+          };
+        },
+        defaultHandlerSuccess: function (
+          this: any,
+          data: { files?: string[] },
+        ) {
+          setImageUploading(false);
+          toast.dismiss("blog-image-upload");
+
+          if (data.files?.length) {
+            this.selection.insertImage(data.files[0], null, 600);
+          }
+        },
+        error: () => {
+          setImageUploading(false);
+          toast.error("Image upload failed");
+        },
+      },
     }),
     [],
   );
@@ -232,6 +274,7 @@ const EditBlogPage = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
+                        type="button"
                         onClick={aiTitleResponse}
                         disabled={aiTitle}
                         variant="ghost"
@@ -272,6 +315,7 @@ const EditBlogPage = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
+                        type="button"
                         onClick={aiDescriptionResponse}
                         disabled={aiDesccription}
                         variant="ghost"
@@ -364,6 +408,12 @@ const EditBlogPage = () => {
                   <span>Improve writing with AI</span>
                 </Button>
               </div>
+
+              {imageUploading && (
+                <p className="mb-2 text-sm font-medium text-blue-600">
+                  Image uploading...
+                </p>
+              )}
 
               <JoditEditor
                 ref={editor}

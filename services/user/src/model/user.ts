@@ -8,6 +8,8 @@ export interface IUser extends Document {
   facebook: string;
   linkedIn: string;
   bio: string;
+    followers: string[];
+  following: string[];
 }
 
 const schema: Schema<IUser> = new Schema({
@@ -36,6 +38,18 @@ const schema: Schema<IUser> = new Schema({
   bio: {
     type: String,
   },
+    followers: [
+    {
+      type: String,
+      default: [],
+    },
+  ],
+  following: [
+    {
+      type: String,
+      default: [],
+    },
+  ],
 },{
     timestamps:true,
 });

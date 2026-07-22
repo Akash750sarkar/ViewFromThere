@@ -46,6 +46,7 @@ const AddBlog = () => {
   const [content, setContent] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -54,7 +55,7 @@ const AddBlog = () => {
     blogcontent: "",
   });
 
-  const {fetchBlogs} =useAppData();
+  const { fetchBlogs } = useAppData();
   const handleInputChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -111,9 +112,9 @@ const AddBlog = () => {
         blogcontent: "",
       });
       setContent("");
-      setTimeout(()=>{
+      setTimeout(() => {
         fetchBlogs();
-      },4000);
+      }, 4000);
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (error) {
       console.log((error as any).response?.data);
@@ -164,12 +165,9 @@ const AddBlog = () => {
   const aiBlogResponse = async () => {
     try {
       setAiblogLoading(true);
-      const { data } = await axios.post(
-        `${author_service}/api/v1/ai/blog`,
-        {
-          blog: formData.blogcontent,
-        },
-      );
+      const { data } = await axios.post(`${author_service}/api/v1/ai/blog`, {
+        blog: formData.blogcontent,
+      });
       setContent(data.html);
       setFormData({ ...formData, blogcontent: data.html });
     } catch (error) {
@@ -182,8 +180,53 @@ const AddBlog = () => {
 
   const config = useMemo(
     () => ({
-      readonly: false, // all options from https://xdsoft.net/jodit/docs/,
+      readonly: false,
       placeholder: "Start typings...",
+      uploader: {
+        insertImageAsBase64URI: false,
+        url: `${author_service}/api/v1/blog/upload-image`,
+        filesVariableName: () => "file",
+        headers: {
+          Authorization: `Bearer ${Cookies.get("token")}`,
+        },
+        format: "json",
+        beforeUpload: () => {
+          setImageUploading(true);
+          toast.loading("Image uploading...", { id: "blog-image-upload" });
+        },
+        isSuccess: () => true,
+        process: (resp: { url: string }) => {
+  setImageUploading(false);
+  toast.dismiss("blog-image-upload");
+
+  return {
+    files: [resp.url],
+    path: "",
+    baseurl: "",
+    error: 0,
+    msg: "",
+  };
+},
+       defaultHandlerSuccess: function (
+  this: any,
+  data: { files?: string[] },
+) {
+  setImageUploading(false);
+  toast.dismiss("blog-image-upload");
+
+  if (data.files?.length) {
+  this.selection.insertHTML(`
+    <figure class="blog-image">
+      <img src="${data.files[0]}" alt="Blog Image" />
+    </figure>
+  `);
+}
+},
+        error: () => {
+          setImageUploading(false);
+          toast.error("Image upload failed");
+        },
+      },
     }),
     [],
   );
@@ -216,6 +259,7 @@ const AddBlog = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
+                        type="button"
                         onClick={aiTitleResponse}
                         disabled={aiTitle}
                         variant="ghost"
@@ -256,6 +300,7 @@ const AddBlog = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
+                        type="button"
                         onClick={aiDescriptionResponse}
                         disabled={aiDesccription}
                         variant="ghost"
@@ -269,7 +314,11 @@ const AddBlog = () => {
                     </TooltipTrigger>
 
                     <TooltipContent>
-                      {formData.description===""?<p>Generate the description with AI</p>:<p>Improve writing with AI</p>}
+                      {formData.description === "" ? (
+                        <p>Generate the description with AI</p>
+                      ) : (
+                        <p>Improve writing with AI</p>
+                      )}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -324,17 +373,25 @@ const AddBlog = () => {
                 </p>
 
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
                   className="bg-blue-100 h-10  hover:bg-amber-200"
                   onClick={aiBlogResponse}
                   disabled={aiblogLoading}
                 >
-                  <WandSparkles  className={aiblogLoading?"animate-spin":""}/>
+                  <WandSparkles
+                    className={aiblogLoading ? "animate-spin" : ""}
+                  />
                   <span>Improve writing with AI</span>
                 </Button>
               </div>
 
+              {imageUploading && (
+                <p className="mb-2 text-sm font-medium text-blue-600">
+                  Image uploading...
+                </p>
+              )}
               <JoditEditor
                 ref={editor}
                 value={content}

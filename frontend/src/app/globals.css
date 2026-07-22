@@ -166,3 +166,19 @@
   fill: white !important;
   stroke: white !important;
 }
+
+.blog-image {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.blog-image img {
+    width: 100%;
+    max-width: 650px;   /* width kam */
+    height: auto;
+
+    display: block;
+    margin: auto;
+
+    border-radius: 20px; /* rounded corners */
+}

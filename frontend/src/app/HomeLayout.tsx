@@ -11,7 +11,7 @@ const HomeLayout: React.FC<BlogsProps> = ({ children }) => {
     <div>
       <SidebarProvider>
         <SideBar />
-        <main className="w-full">
+        <main className="w-full pt-[72px]">
           <div className="w-full min-h-[calc(100vh-45px)] px-4">{children}</div>
         </main>
       </SidebarProvider>

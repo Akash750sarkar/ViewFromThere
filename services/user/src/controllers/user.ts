@@ -151,3 +151,52 @@ export const updateProfilePic = TryCatch(
   },
 );
 
+export const followUser = TryCatch(async (req: AuthenticatedRequest, res) => {
+  const userId = req.user?._id?.toString();
+  const authorId = req.params.id;
+
+if (typeof authorId !== "string") {
+  return res.status(400).json({
+    message: "Invalid author id",
+  });
+}
+
+
+
+  if (!userId) {
+    res.status(401).json({ message: "Please login" });
+    return;
+  }
+
+  if (userId === authorId) {
+    res.status(400).json({ message: "You cannot follow yourself" });
+    return;
+  }
+
+  const author = await User.findById(authorId);
+  const currentUser = await User.findById(userId);
+
+  if (!author || !currentUser) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  const isFollowing = author.followers.includes(userId);
+
+  if (isFollowing) {
+    author.followers = author.followers.filter((id) => id !== userId);
+    currentUser.following = currentUser.following.filter((id) => id !== authorId);
+  } else {
+    author.followers.push(userId);
+    currentUser.following.push(authorId);
+  }
+
+  await author.save();
+  await currentUser.save();
+
+  res.json({
+    message: isFollowing ? "Unfollowed" : "Followed",
+    isFollowing: !isFollowing,
+    followerCount: author.followers.length,
+  });
+});

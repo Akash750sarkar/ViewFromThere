@@ -28,6 +28,9 @@ export const isAuth = async (
 
     const token = authHeader.split(" ")[1];
 
+    console.log("Auth Header:", authHeader);
+console.log("Extracted Token:", token);
+
     const decoded = jwt.verify(
       token,
       process.env.JWT_SEC as string,

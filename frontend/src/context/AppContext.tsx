@@ -25,6 +25,8 @@ export interface User {
   facebook: string;
   linkedIn: string;
   bio: string;
+  followers?: string[];
+  following?: string[];
 }
 
 export interface Blog {
@@ -79,6 +81,8 @@ interface AppContextType {
 
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   searchQuery: string;
+
+  category: string;
   setCategory: React.Dispatch<React.SetStateAction<string>>;
 
   savedBlogs: SavedBlogType[] | null;
@@ -146,20 +150,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     fetchBlogs(page);
   }, [searchQuery, category, page]);
 
-  // async function fetchBlogs() {
-  //   setBlogLoading(true);
-  //   try {
-  //     const { data } = await axios.get(
-  //       `${blog_service}/api/v1/blog/all?searchQuery=${searchQuery}&category=${category}`,
-  //     );
-  //     setBlogs(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //   } finally {
-  //     setBlogLoading(false);
-  //   }
-  // }
-
   async function fetchBlogs(pageNumber = 1) {
     setBlogLoading(true);
 
@@ -216,6 +206,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         setIsAuth,
         fetchBlogs,
         logoutUser,
+        category,  
         setCategory,
         setSearchQuery,
         searchQuery,

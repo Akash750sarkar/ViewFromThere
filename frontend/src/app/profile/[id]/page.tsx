@@ -17,9 +17,11 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import BlogCard from "@/components/BlogCard";
 
 const UserProfile = () => {
   const [user, setUser] = useState<User | null>(null);
+  const { blogs, blogLoading } = useAppData();
 
   const { id } = useParams();
 
@@ -39,9 +41,12 @@ const UserProfile = () => {
   if (!user) {
     return <Loading />;
   }
+
+  const authorBlogs = blogs?.filter((blog) => blog.author === user._id) || [];
+
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <Card className="w-full max-w-xl shadow-lg border rounded-2xl p-6">
+    <div className="min-h-screen p-4">
+      <Card className="w-full max-w-xl mx-auto shadow-lg border rounded-2xl p-6">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Profile</CardTitle>
           <CardContent className="flex flex-col items-center space-y-4">
@@ -49,7 +54,24 @@ const UserProfile = () => {
               <AvatarImage src={user?.image} alt="profile pic" />
             </Avatar>
             <div className="w-full space-y-2 text-center">
-              <p>{user?.name}</p>
+              <p className="text-xl font-semibold text-gray-900">
+                {user?.name}
+              </p>
+            </div>
+            <div className="flex justify-center gap-2 w-full">
+              <div className="border rounded-md px-3 py-1.5 text-center bg-gray-50 min-w-20">
+                <p className="text-base font-semibold text-gray-900 leading-none">
+                  {user?.followers?.length || 0}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Followers</p>
+              </div>
+
+              <div className="border rounded-md px-3 py-1.5 text-center bg-gray-50 min-w-20">
+                <p className="text-base font-semibold text-gray-900 leading-none">
+                  {user?.following?.length || 0}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Following</p>
+              </div>
             </div>
             {user?.bio && (
               <div className="w-full space-y-2 text-center">
@@ -87,7 +109,41 @@ const UserProfile = () => {
             </div>
           </CardContent>
         </CardHeader>
-      </Card>
+            </Card>
+
+      <section className="w-full max-w-6xl mx-auto mt-8">
+        <div className="mb-5 text-center">
+          <h2 className="text-2xl font-semibold text-gray-900">
+            Blogs by {user.name}
+          </h2>
+          <p className="text-sm text-gray-500">
+            {authorBlogs.length} {authorBlogs.length === 1 ? "blog" : "blogs"} published
+          </p>
+        </div>
+
+        {blogLoading ? (
+          <Loading />
+        ) : authorBlogs.length > 0 ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {authorBlogs.map((blog) => (
+              <BlogCard
+                key={blog.id}
+                image={blog.image}
+                title={blog.title}
+                desc={blog.description}
+                id={blog.id}
+                time={blog.created_at}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card className="max-w-xl mx-auto">
+            <CardContent className="py-6 text-center text-gray-500">
+              This author has not published any blogs yet.
+            </CardContent>
+          </Card>
+        )}
+      </section>
     </div>
   );
 };

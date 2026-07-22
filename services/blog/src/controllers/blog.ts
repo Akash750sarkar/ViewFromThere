@@ -236,3 +236,98 @@ export const getSavedBlog = TryCatch(async(req:AuthenticatedRequest,res)=>{
   res.json(blogs);
 })
 
+export const getBlogReactions = TryCatch(async (req: AuthenticatedRequest, res) => {
+  const { blogid } = req.params;
+  const userid = req.user?._id;
+
+  const counts = await sql`
+    SELECT
+      COUNT(*) FILTER (WHERE reaction = 'like') AS likes,
+      COUNT(*) FILTER (WHERE reaction = 'dislike') AS dislikes
+    FROM blogreactions
+    WHERE blogid = ${blogid}
+  `;
+
+  let userReaction = null;
+
+  if (userid) {
+    const existing = await sql`
+      SELECT reaction FROM blogreactions
+      WHERE userid = ${userid} AND blogid = ${blogid}
+    `;
+
+    userReaction = existing[0]?.reaction || null;
+  }
+
+  res.json({
+    likes: Number(counts[0].likes),
+    dislikes: Number(counts[0].dislikes),
+    userReaction,
+  });
+});
+
+export const reactToBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
+  const { blogid } = req.params;
+  const userid = req.user?._id;
+  const { reaction } = req.body;
+
+  if (!userid) {
+    res.status(401).json({ message: "Please Login" });
+    return;
+  }
+
+  if (reaction !== "like" && reaction !== "dislike") {
+    res.status(400).json({ message: "Reaction must be like or dislike" });
+    return;
+  }
+
+  const blog = await sql`SELECT id FROM blogs WHERE id = ${blogid}`;
+
+  if (blog.length === 0) {
+    res.status(404).json({ message: "Blog not found" });
+    return;
+  }
+
+  const existing = await sql`
+    SELECT reaction FROM blogreactions
+    WHERE userid = ${userid} AND blogid = ${blogid}
+  `;
+
+  if (existing.length > 0 && existing[0].reaction === reaction) {
+    await sql`
+      DELETE FROM blogreactions
+      WHERE userid = ${userid} AND blogid = ${blogid}
+    `;
+  } else if (existing.length > 0) {
+    await sql`
+      UPDATE blogreactions
+      SET reaction = ${reaction}
+      WHERE userid = ${userid} AND blogid = ${blogid}
+    `;
+  } else {
+    await sql`
+      INSERT INTO blogreactions(userid, blogid, reaction)
+      VALUES (${userid}, ${blogid}, ${reaction})
+    `;
+  }
+
+  const counts = await sql`
+    SELECT
+      COUNT(*) FILTER (WHERE reaction = 'like') AS likes,
+      COUNT(*) FILTER (WHERE reaction = 'dislike') AS dislikes
+    FROM blogreactions
+    WHERE blogid = ${blogid}
+  `;
+
+  const updatedReaction = await sql`
+    SELECT reaction FROM blogreactions
+    WHERE userid = ${userid} AND blogid = ${blogid}
+  `;
+
+  res.json({
+    message: "Reaction updated",
+    likes: Number(counts[0].likes),
+    dislikes: Number(counts[0].dislikes),
+    userReaction: updatedReaction[0]?.reaction || null,
+  });
+});
