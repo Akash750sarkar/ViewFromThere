@@ -12,9 +12,12 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-export const user_service = "http://localhost:5000";
-export const author_service = "http://localhost:5001";
-export const blog_service = "http://localhost:5002";
+// --- Replace lines 15-17 in AppContext.tsx ---
+export const GATEWAY_URL = "http://localhost:8000";
+
+export const user_service = `${GATEWAY_URL}/user-service`;
+export const author_service = `${GATEWAY_URL}/author-service`;
+export const blog_service = `${GATEWAY_URL}/blog-service`;
 
 export interface User {
   _id: string;
@@ -46,25 +49,6 @@ interface SavedBlogType {
   blogid: string;
   create_at: string;
 }
-
-// interface AppContextType {
-//   user: User | null;
-//   isAuth: boolean;
-//   loading: boolean;
-//   blogLoading: boolean;
-//   blogs: Blog[] | null;
-
-//   setUser: React.Dispatch<React.SetStateAction<User | null>>;
-//   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-//   setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
-//   fetchBlogs: () => Promise<void>;
-//   logoutUser: () => Promise<void>;
-//   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
-//   searchQuery: string;
-//   setCategory: React.Dispatch<React.SetStateAction<string>>;
-//   savedBlogs: SavedBlogType[]|null;
-//   getSavedBlogs: ()=> Promise<void>
-// }
 
 interface AppContextType {
   user: User | null;

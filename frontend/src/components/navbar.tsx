@@ -26,6 +26,7 @@ const Navbar = () => {
               src="/logo2.png"
               alt="ViewFromThere Logo"
               fill
+              sizes="48px"
               className="object-cover transition-transform duration-300 group-hover:scale-105"
               priority
             />

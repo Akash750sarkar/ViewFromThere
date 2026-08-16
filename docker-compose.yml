@@ -29,6 +29,8 @@ services:
     build:
       context: ./services/user
     container_name: user-service
+    ports:
+      - "5000:5000"
     env_file:
       - ./services/user/.env
     restart: unless-stopped
@@ -37,8 +39,12 @@ services:
     build:
       context: ./services/author
     container_name: author-service
+    ports:
+      - "5001:5001"
     env_file:
       - ./services/author/.env
+    environment:
+      - RabbitMQ_Host=rabbitmq
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -48,8 +54,14 @@ services:
     build:
       context: ./services/blog
     container_name: blog-service
+    ports:
+      - "5002:5002"
     env_file:
       - ./services/blog/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - RabbitMQ_Host=rabbitmq
+      - USER_SERVICE=http://user-service:5000
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -57,4 +69,17 @@ services:
         condition: service_started
       user-service:
         condition: service_started
+    restart: unless-stopped
+
+  api-gateway:
+    image: nginx:alpine
+    container_name: api-gateway
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - user-service
+      - author-service
+      - blog-service
     restart: unless-stopped
